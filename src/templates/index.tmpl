@@ -117,10 +117,11 @@
     </div>
   </header>
 
-  <div role="main" class="container">
+  <div role="main" class="container-fluid">
     <div class="row clear-navbar"></div>
 
     <div class="row">
+      <div class="row-fluid">
       <div class="span12">
         <!--[if lt IE 7]>
         <p class="alert alert-error">Your browser is <em>ancient!</em>
@@ -140,9 +141,12 @@
       </div>
 
     </div>
+    </div>
 
     <div class="row">
-      <div class="span3">
+
+      <div class="row-fluid">
+      <div class="span3" style="margin-left: 50px;">
         <form class="form-search" ng-submit="submitForm()">
           <% if (bestMatch) { %>
           <div class="dropdown search"
@@ -226,7 +230,6 @@
         </form>
       </div>
       <div class="span9">
-
         <ul class="breadcrumb">
           <li ng-repeat="crumb in breadcrumb">
             <span ng-hide="crumb.url">{{crumb.name}}</span>
@@ -244,6 +247,7 @@
           <div id="disqus_thread" class="content-panel-content"></div>
         </div>
 <% } %>
+      </div>
       </div>
     </div>
   </div>
