@@ -694,21 +694,28 @@ Doc.prototype = {
     var self = this;
     var name = self.name.match(/^angular(\.mock)?\.(\w+)$/) ? self.name : self.name.split(/\./).pop()
 
-    dom.h('Usage', function() {
-      dom.code(function() {
-        if (self.constructor) {
-          dom.text('new ');
-        }
-        dom.text(name.split(':').pop());
-        dom.text('(');
-        self.parameters(dom, ', ');
-        dom.text(');');
+    if (self.usage) {
+      dom.h('Usage', function() {
+        dom.code(function () {
+          dom.text(self.usage);
+        });
       });
+    }
+    /* dom.h('Usage', function() {
+     dom.code(function() {
+     if (self.constructor) {
+     dom.text('new ');
+     }
+     dom.text(name.split(':').pop());
+     dom.text('(');
+     self.parameters(dom, ', ');
+     dom.text(');');
+     });
 
-      self.html_usage_parameters(dom);
-      self.html_usage_this(dom);
-      self.html_usage_returns(dom);
-    });
+     self.html_usage_parameters(dom);
+     self.html_usage_this(dom);
+     self.html_usage_returns(dom);
+     });*/
     this.method_properties_events(dom);
   },
 
@@ -904,6 +911,14 @@ Doc.prototype = {
     this.method_properties_events(dom);
   },
 
+  html_usage_resolver: function(dom) {
+    this.html_usage_interface(dom)
+  },
+
+  html_usage_controller: function(dom) {
+    this.html_usage_interface(dom)
+  },
+
   html_usage_service: function(dom) {
     this.html_usage_interface(dom)
   },
@@ -1016,6 +1031,8 @@ var GLOBALS = /^angular\.([^\.]+)$/,
     MODULE_DIRECTIVE = /^(.+)\.directives?:([^\.]+)$/,
     MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
     MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
+    MODULE_RESOLVER = /^(.+)\.([^\.]+?)(Resolver)?$/,
+    MODULE_CONTROLLER = /^(.+)\.([^\.]+?)(Controller)?$/,
     MODULE_SERVICE = /^(.+)\.([^\.]+?)(Service)?$/,
     MODULE_FACTORY = /^(.+)\.([^\.]+?)(Factory)?$/,
     MODULE_PROVIDER = /^(.+)\.([^\.]+?)(Provider)?$/,
@@ -1073,6 +1090,16 @@ function title(doc) {
     return makeTitle(match[3], doc.ngdoc || match[2], 'module', match[1]);
   } else if (match = text.match(MODULE_TYPE) && doc.ngdoc === 'type') {
     return makeTitle(match[2], 'type', 'module', module || match[1]);
+  } else if (match = text.match(MODULE_RESOLVER)) {
+    if (overview) {
+      return makeTitle('', '', 'module', text);
+    }
+    return makeTitle(match[2] + (match[3] || ''), 'resolver', 'module', module || match[1]);
+  } else if (match = text.match(MODULE_CONTROLLER)) {
+    if (overview) {
+      return makeTitle('', '', 'module', text);
+    }
+    return makeTitle(match[2] + (match[3] || ''), 'controller', 'module', module || match[1]);
   } else if (match = text.match(MODULE_SERVICE)) {
     if (overview) {
       // module name with dots looks like a service
@@ -1081,13 +1108,11 @@ function title(doc) {
     return makeTitle(match[2] + (match[3] || ''), 'service', 'module', module || match[1]);
   } else if (match = text.match(MODULE_FACTORY)) {
     if (overview) {
-      // module name with dots looks like a factory
       return makeTitle('', '', 'module', text);
     }
     return makeTitle(match[2] + (match[3] || ''), 'factory', 'module', module || match[1]);
   } else if (match = text.match(MODULE_PROVIDER)) {
     if (overview) {
-      // module name with dots looks like a provider
       return makeTitle('', '', 'module', text);
     }
     return makeTitle(match[2] + (match[3] || ''), 'provider', 'module', module || match[1]);
@@ -1167,6 +1192,8 @@ var KEYWORD_PRIORITY = {
   '.scopes': 4,
   '.compiler': 5,
   '.templates': 6,
+  '.resolvers': 7,
+  '.controllers': 7,
   '.services': 7,
   '.factories': 7,
   '.providers': 7,
@@ -1186,6 +1213,8 @@ var KEYWORD_PRIORITY = {
   '.dev_guide.scopes.internals': 2,
   '.dev_guide.compiler': 5,
   '.dev_guide.templates': 6,
+  '.dev_guide.resolvers': 7,
+  '.dev_guide.controllers': 7,
   '.dev_guide.services': 7,
   '.dev_guide.factories': 7,
   '.dev_guide.providers': 7,
@@ -1202,6 +1231,22 @@ var GUIDE_PRIORITY = [
   'dev_guide.mvc.understanding_controller',
   'dev_guide.mvc.understanding_model',
   'dev_guide.mvc.understanding_view',
+
+  'dev_guide.resolvers.understanding_resolvers',
+  'dev_guide.resolvers.managing_dependencies',
+  'dev_guide.resolvers.creating_resolvers',
+  'dev_guide.resolvers.injecting_resolvers',
+  'dev_guide.resolvers.testing_resolvers',
+  'dev_guide.resolvers.$location',
+  'dev_guide.resolvers',
+
+  'dev_guide.controllers.understanding_controllers',
+  'dev_guide.controllers.managing_dependencies',
+  'dev_guide.controllers.creating_controllers',
+  'dev_guide.controllers.injecting_controllers',
+  'dev_guide.controllers.testing_controllers',
+  'dev_guide.controllers.$location',
+  'dev_guide.controllers',
 
   'dev_guide.services.understanding_services',
   'dev_guide.services.managing_dependencies',
@@ -1378,7 +1423,7 @@ function checkBrokenLinks(docs, apis, options) {
   docs.forEach(function(doc) {
     byFullId[doc.section + '/' + doc.id] = doc;
     if (apis[doc.section]) {
-      doc.anchors.push('directive', 'service', 'factory', 'provider', 'filter', 'function');
+      doc.anchors.push('directive', 'resolver', 'controller', 'service', 'factory', 'provider', 'filter', 'function');
     }
   });
 

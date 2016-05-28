@@ -231,11 +231,13 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       GLOBALS = /^angular\.([^\.]+)$/,
       MODULE = /^([^\.]+)$/,
       MODULE_MOCK = /^angular\.mock\.([^\.]+)$/,
-      MODULE_CONTROLLER = /^(.+)\.controllers?:([^\.]+)$/,
+  // MODULE_CONTROLLER = /^(.+)\.controllers?:([^\.]+)$/,
       MODULE_DIRECTIVE = /^(.+)\.directives?:([^\.]+)$/,
       MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
       MODULE_FILTER = /^(.+)\.filters?:([^\.]+)$/,
       MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
+      MODULE_RESOLVER = /^(.+)\.([^\.]+?)(Resolver)?$/,
+      MODULE_CONTROLLER = /^(.+)\.([^\.]+?)(Controller)?$/,
       MODULE_SERVICE = /^(.+)\.([^\.]+?)(Service)?$/,
       MODULE_FACTORY = /^(.+)\.([^\.]+?)(Factory)?$/,
       MODULE_PROVIDER = /^(.+)\.([^\.]+?)(Provider)?$/,
@@ -322,9 +324,9 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         match[1] = page.moduleName || match[1];
         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
         breadcrumb.push({ name: match[2] });
-      } else if (match = partialId.match(MODULE_CONTROLLER)) {
-        breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
-        breadcrumb.push({ name: match[2] });
+        /* } else if (match = partialId.match(MODULE_CONTROLLER)) {
+         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
+         breadcrumb.push({ name: match[2] });*/
       } else if (match = partialId.match(MODULE_DIRECTIVE)) {
         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
         breadcrumb.push({ name: match[2] });
@@ -340,34 +342,19 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         match[1] = page.moduleName || match[1];
         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
         breadcrumb.push({ name: match[2] });
-      }  else if ( (match = partialId.match(MODULE_SERVICE)) || (match = partialId.match(MODULE_FACTORY)) || (match = partialId.match(MODULE_PROVIDER))) {
+      }  else if (
+          (match = partialId.match(MODULE_RESOLVER)) || (match = partialId.match(MODULE_CONTROLLER))
+          || (match = partialId.match(MODULE_SERVICE)) || (match = partialId.match(MODULE_FACTORY))
+          || (match = partialId.match(MODULE_PROVIDER))
+      ) {
         if ( page.type === 'overview') {
-          // module name with dots looks like a service
           breadcrumb.push({ name: partialId });
         } else {
           match[1] = page.moduleName || match[1];
           breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
           breadcrumb.push({ name: match[2] + (match[3] || '') });
         }
-      } /*else if (match = partialId.match(MODULE_FACTORY)) {
-       if ( page.type === 'overview') {
-       // module name with dots looks like a service
-       breadcrumb.push({ name: partialId });
-       } else {
-       match[1] = page.moduleName || match[1];
-       breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
-       breadcrumb.push({ name: match[2] + (match[3] || '') });
-       }
-       } else if (match = partialId.match(MODULE_PROVIDER)) {
-       if ( page.type === 'overview') {
-       // module name with dots looks like a service
-       breadcrumb.push({ name: partialId });
-       } else {
-       match[1] = page.moduleName || match[1];
-       breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
-       breadcrumb.push({ name: match[2] + (match[3] || '') });
-       }
-       } */else if (match = partialId.match(MODULE_MOCK)) {
+      } else if (match = partialId.match(MODULE_MOCK)) {
         breadcrumb.push({ name: 'angular.mock.' + match[1] });
       } else {
         breadcrumb.push({ name: page.shortName });
@@ -429,14 +416,18 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         module(page.moduleName || match[1], section);
       } else if (match = id.match(MODULE_FILTER)) {
         module(page.moduleName || match[1], section).filters.push(page);
-      } else if (match = id.match(MODULE_CONTROLLER) && page.type === 'controller') {
-        module(page.moduleName || match[1], section).controllers.push(page);
+        /*} else if (match = id.match(MODULE_CONTROLLER) && page.type === 'controller') {
+         module(page.moduleName || match[1], section).controllers.push(page);*/
       } else if (match = id.match(MODULE_DIRECTIVE)) {
         module(page.moduleName || match[1], section).directives.push(page);
       } else if (match = id.match(MODULE_DIRECTIVE_INPUT)) {
         module(page.moduleName || match[1], section).directives.push(page);
       } else if (match = id.match(MODULE_CUSTOM)) {
-        if (page.type === 'service') {
+        if (page.type === 'resolver') {
+          module(page.moduleName || match[1], section).resolver(match[3])['resolver'] = page;
+        } else if (page.type === 'controller') {
+          module(page.moduleName || match[1], section).controller(match[3])['controller'] = page;
+        } else if (page.type === 'service') {
           module(page.moduleName || match[1], section).service(match[3])['service'] = page;
         } else if (page.type === 'factory') {
           module(page.moduleName || match[1], section).factory(match[3])['factory'] = page;
@@ -454,6 +445,18 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         }
       } else if (match = id.match(MODULE_TYPE) && page.type === 'type') {
         module(page.moduleName || match[1], section).types.push(page);
+      } else if (match = id.match(MODULE_RESOLVER)) {
+        if (page.type === 'overview') {
+          module(id, section);
+        } else {
+          module(page.moduleName || match[1], section).resolver(match[2])['resolver'] = page;
+        }
+      } else if (match = id.match(MODULE_CONTROLLER)) {
+        if (page.type === 'overview') {
+          module(id, section);
+        } else {
+          module(page.moduleName || match[1], section).controller(match[2])['controller'] = page;
+        }
       } else if (match = id.match(MODULE_SERVICE)) {
         if (page.type === 'overview') {
           module(id, section);
@@ -489,12 +492,31 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           name: name,
           url: (NG_DOCS.html5Mode ? '' : '#/') + section + '/' + name,
           globals: [],
-          controllers: [],
           directives: [],
+          resolvers: [],
+          controllers: [],
           services: [],
           factories: [],
           providers: [],
           others: [],
+          resolver: function(name) {
+            var resolver =  cache[this.name + ':' + name];
+            if (!resolver) {
+              resolver = {name: name};
+              cache[this.name + ':' + name] = resolver;
+              this.resolvers.push(resolver);
+            }
+            return resolver;
+          },
+          controller: function(name) {
+            var controller =  cache[this.name + ':' + name];
+            if (!controller) {
+              controller = {name: name};
+              cache[this.name + ':' + name] = controller;
+              this.controllers.push(controller);
+            }
+            return controller;
+          },
           service: function(name) {
             var service =  cache[this.name + ':' + name];
             if (!service) {
