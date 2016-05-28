@@ -340,7 +340,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         match[1] = page.moduleName || match[1];
         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
         breadcrumb.push({ name: match[2] });
-      }  else if (match = partialId.match(MODULE_SERVICE)) {
+      }  else if ( (match = partialId.match(MODULE_SERVICE)) || (match = partialId.match(MODULE_FACTORY)) || (match = partialId.match(MODULE_PROVIDER))) {
         if ( page.type === 'overview') {
           // module name with dots looks like a service
           breadcrumb.push({ name: partialId });
@@ -349,25 +349,25 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
           breadcrumb.push({ name: match[2] + (match[3] || '') });
         }
-      } else if (match = partialId.match(MODULE_FACTORY)) {
-        if ( page.type === 'overview') {
-          // module name with dots looks like a service
-          breadcrumb.push({ name: partialId });
-        } else {
-          match[1] = page.moduleName || match[1];
-          breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
-          breadcrumb.push({ name: match[2] + (match[3] || '') });
-        }
-      } else if (match = partialId.match(MODULE_PROVIDER)) {
-        if ( page.type === 'overview') {
-          // module name with dots looks like a service
-          breadcrumb.push({ name: partialId });
-        } else {
-          match[1] = page.moduleName || match[1];
-          breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
-          breadcrumb.push({ name: match[2] + (match[3] || '') });
-        }
-      } else if (match = partialId.match(MODULE_MOCK)) {
+      } /*else if (match = partialId.match(MODULE_FACTORY)) {
+       if ( page.type === 'overview') {
+       // module name with dots looks like a service
+       breadcrumb.push({ name: partialId });
+       } else {
+       match[1] = page.moduleName || match[1];
+       breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
+       breadcrumb.push({ name: match[2] + (match[3] || '') });
+       }
+       } else if (match = partialId.match(MODULE_PROVIDER)) {
+       if ( page.type === 'overview') {
+       // module name with dots looks like a service
+       breadcrumb.push({ name: partialId });
+       } else {
+       match[1] = page.moduleName || match[1];
+       breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
+       breadcrumb.push({ name: match[2] + (match[3] || '') });
+       }
+       } */else if (match = partialId.match(MODULE_MOCK)) {
         breadcrumb.push({ name: 'angular.mock.' + match[1] });
       } else {
         breadcrumb.push({ name: page.shortName });
@@ -437,7 +437,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         module(page.moduleName || match[1], section).directives.push(page);
       } else if (match = id.match(MODULE_CUSTOM)) {
         if (page.type === 'service') {
-          module(page.moduleName || match[1], section).service(match[3])[page.id.match(/^.+Provider$/) ? 'provider' : 'instance'] = page;
+          module(page.moduleName || match[1], section).service(match[3])['service'] = page;
         } else if (page.type === 'factory') {
           module(page.moduleName || match[1], section).factory(match[3])['factory'] = page;
         } else if (page.type === 'provider') {
@@ -458,7 +458,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         if (page.type === 'overview') {
           module(id, section);
         } else {
-          module(page.moduleName || match[1], section).service(match[2])[match[3] ? 'provider' : 'instance'] = page;
+          module(page.moduleName || match[1], section).service(match[2])['service'] = page;
         }
       } else if (match = id.match(MODULE_FACTORY)) {
         if (page.type === 'overview') {
@@ -493,6 +493,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           directives: [],
           services: [],
           factories: [],
+          providers: [],
           others: [],
           service: function(name) {
             var service =  cache[this.name + ':' + name];
@@ -517,7 +518,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
             if (!provider) {
               provider = {name: name};
               cache[this.name + ':' + name] = provider;
-              this.factories.push(provider);
+              this.providers.push(provider);
             }
             return provider;
           },
