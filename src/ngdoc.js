@@ -912,6 +912,10 @@ Doc.prototype = {
     this.html_usage_interface(dom)
   },
 
+  html_usage_provider: function(dom) {
+    this.html_usage_interface(dom)
+  },
+
   html_usage_object: function(dom) {
     this.html_usage_interface(dom)
   },
@@ -1012,8 +1016,9 @@ var GLOBALS = /^angular\.([^\.]+)$/,
     MODULE_DIRECTIVE = /^(.+)\.directives?:([^\.]+)$/,
     MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
     MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
-    MODULE_SERVICE = /^(.+)\.([^\.]+?)(Provider)?$/,
+    MODULE_SERVICE = /^(.+)\.([^\.]+?)(Service)?$/,
     MODULE_FACTORY = /^(.+)\.([^\.]+?)(Factory)?$/,
+    MODULE_PROVIDER = /^(.+)\.([^\.]+?)(Provider)?$/,
     MODULE_TYPE = /^([^\.]+)\..+\.([A-Z][^\.]+)$/;
 
 
@@ -1074,12 +1079,18 @@ function title(doc) {
       return makeTitle('', '', 'module', text);
     }
     return makeTitle(match[2] + (match[3] || ''), 'service', 'module', module || match[1]);
-  }else if (match = text.match(MODULE_FACTORY)) {
+  } else if (match = text.match(MODULE_FACTORY)) {
     if (overview) {
       // module name with dots looks like a factory
       return makeTitle('', '', 'module', text);
     }
     return makeTitle(match[2] + (match[3] || ''), 'factory', 'module', module || match[1]);
+  } else if (match = text.match(MODULE_PROVIDER)) {
+    if (overview) {
+      // module name with dots looks like a provider
+      return makeTitle('', '', 'module', text);
+    }
+    return makeTitle(match[2] + (match[3] || ''), 'provider', 'module', module || match[1]);
   }
   return text;
 }
@@ -1158,6 +1169,7 @@ var KEYWORD_PRIORITY = {
   '.templates': 6,
   '.services': 7,
   '.factories': 7,
+  '.providers': 7,
   '.di': 8,
   '.unit-testing': 9,
   '.dev_guide': 9,
@@ -1176,6 +1188,7 @@ var KEYWORD_PRIORITY = {
   '.dev_guide.templates': 6,
   '.dev_guide.services': 7,
   '.dev_guide.factories': 7,
+  '.dev_guide.providers': 7,
   '.dev_guide.di': 8,
   '.dev_guide.unit-testing': 9
 };
@@ -1205,6 +1218,14 @@ var GUIDE_PRIORITY = [
   'dev_guide.factories.testing_factories',
   'dev_guide.factories.$location',
   'dev_guide.factories',
+
+  'dev_guide.providers.understanding_providers',
+  'dev_guide.providers.managing_dependencies',
+  'dev_guide.providers.creating_providers',
+  'dev_guide.providers.injecting_controllers',
+  'dev_guide.providers.testing_providers',
+  'dev_guide.providers.$location',
+  'dev_guide.providers',
 
   'databinding',
   'dev_guide.templates.css-styling',
@@ -1357,7 +1378,7 @@ function checkBrokenLinks(docs, apis, options) {
   docs.forEach(function(doc) {
     byFullId[doc.section + '/' + doc.id] = doc;
     if (apis[doc.section]) {
-      doc.anchors.push('directive', 'service', 'factory', 'filter', 'function');
+      doc.anchors.push('directive', 'service', 'factory', 'provider', 'filter', 'function');
     }
   });
 

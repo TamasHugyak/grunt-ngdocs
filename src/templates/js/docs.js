@@ -236,8 +236,9 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
       MODULE_FILTER = /^(.+)\.filters?:([^\.]+)$/,
       MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
-      MODULE_SERVICE = /^(.+)\.([^\.]+?)(Provider)?$/,
+      MODULE_SERVICE = /^(.+)\.([^\.]+?)(Service)?$/,
       MODULE_FACTORY = /^(.+)\.([^\.]+?)(Factory)?$/,
+      MODULE_PROVIDER = /^(.+)\.([^\.]+?)(Provider)?$/,
       MODULE_TYPE = /^([^\.]+)\..+\.([A-Z][^\.]+)$/;
 
 
@@ -348,7 +349,16 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
           breadcrumb.push({ name: match[2] + (match[3] || '') });
         }
-      }  else if (match = partialId.match(MODULE_FACTORY)) {
+      } else if (match = partialId.match(MODULE_FACTORY)) {
+        if ( page.type === 'overview') {
+          // module name with dots looks like a service
+          breadcrumb.push({ name: partialId });
+        } else {
+          match[1] = page.moduleName || match[1];
+          breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
+          breadcrumb.push({ name: match[2] + (match[3] || '') });
+        }
+      } else if (match = partialId.match(MODULE_PROVIDER)) {
         if ( page.type === 'overview') {
           // module name with dots looks like a service
           breadcrumb.push({ name: partialId });
@@ -430,6 +440,8 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           module(page.moduleName || match[1], section).service(match[3])[page.id.match(/^.+Provider$/) ? 'provider' : 'instance'] = page;
         } else if (page.type === 'factory') {
           module(page.moduleName || match[1], section).factory(match[3])['factory'] = page;
+        } else if (page.type === 'provider') {
+          module(page.moduleName || match[1], section).provider(match[3])['provider'] = page;
         } else {
           var m = module(page.moduleName || match[1], section),
               listName = page.type + 's';
@@ -448,11 +460,17 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         } else {
           module(page.moduleName || match[1], section).service(match[2])[match[3] ? 'provider' : 'instance'] = page;
         }
-      }else if (match = id.match(MODULE_FACTORY)) {
+      } else if (match = id.match(MODULE_FACTORY)) {
         if (page.type === 'overview') {
           module(id, section);
         } else {
-          module(page.moduleName || match[1], section).factory(match[2])[match[3] ? 'factory' : 'instance'] = page;
+          module(page.moduleName || match[1], section).factory(match[2])['factory'] = page;
+        }
+      } else if (match = id.match(MODULE_PROVIDER)) {
+        if (page.type === 'overview') {
+          module(id, section);
+        } else {
+          module(page.moduleName || match[1], section).provider(match[2])['provider'] = page;
         }
       } else if (match = id.match(MODULE_MOCK)) {
         module('ngMock', section).globals.push(page);
@@ -486,13 +504,22 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
             return service;
           },
           factory: function(name) {
-            var service =  cache[this.name + ':' + name];
-            if (!service) {
-              service = {name: name};
-              cache[this.name + ':' + name] = service;
-              this.factories.push(service);
+            var factory =  cache[this.name + ':' + name];
+            if (!factory) {
+              factory = {name: name};
+              cache[this.name + ':' + name] = factory;
+              this.factories.push(factory);
             }
-            return service;
+            return factory;
+          },
+          provider: function(name) {
+            var provider =  cache[this.name + ':' + name];
+            if (!provider) {
+              provider = {name: name};
+              cache[this.name + ':' + name] = provider;
+              this.factories.push(provider);
+            }
+            return provider;
           },
           types: [],
           filters: []
@@ -559,11 +586,11 @@ function module(name, modules, optional) {
 }
 
 module('docsApp', ['bootstrap', 'bootstrapPrettify'], ['ngAnimate']).
-config(function($locationProvider) {
-  if (NG_DOCS.html5Mode) {
-    $locationProvider.html5Mode(true).hashPrefix('!');
-  }
-}).
-factory(docsApp.serviceFactory).
-directive(docsApp.directive).
-controller(docsApp.controller);
+  config(function($locationProvider) {
+    if (NG_DOCS.html5Mode) {
+      $locationProvider.html5Mode(true).hashPrefix('!');
+    }
+  }).
+  factory(docsApp.serviceFactory).
+  directive(docsApp.directive).
+  controller(docsApp.controller);
