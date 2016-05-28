@@ -13,12 +13,12 @@ var marked = require('marked');
 var renderer = new marked.Renderer();
 renderer.heading = function (text, level) {
   return '<h' +
-    level +
-    '>' +
-    text +
-    '</h' +
-    level +
-    '>\n';
+      level +
+      '>' +
+      text +
+      '</h' +
+      level +
+      '>\n';
 };
 marked.setOptions({
   renderer: renderer,
@@ -128,7 +128,7 @@ Doc.prototype = {
   getMinerrNamespace: function () {
     if (this.ngdoc !== 'error') {
       throw new Error('Tried to get the minErr namespace, but @ngdoc ' +
-        this.ngdoc + ' was supplied. It should be @ngdoc error');
+          this.ngdoc + ' was supplied. It should be @ngdoc error');
     }
     return this.name.split(':')[0];
   },
@@ -136,7 +136,7 @@ Doc.prototype = {
   getMinerrCode: function () {
     if (this.ngdoc !== 'error') {
       throw new Error('Tried to get the minErr error code, but @ngdoc ' +
-        this.ngdoc + ' was supplied. It should be @ngdoc error');
+          this.ngdoc + ' was supplied. It should be @ngdoc error');
     }
     return this.name.split(':')[1];
   },
@@ -175,12 +175,12 @@ Doc.prototype = {
     if (!text) return text;
 
     var self = this,
-      IS_URL = /^(https?:\/\/|ftps?:\/\/|mailto:|\.|\/)/,
-      IS_ANGULAR = /^(api\/)?(angular|ng|AUTO)\./,
-      IS_HASH = /^#/,
-      parts = trim(text).split(/(<pre.*?>[\s\S]*?<\/pre>|<doc:example(\S*).*?>[\s\S]*?<\/doc:example>|<example[^>]*>[\s\S]*?<\/example>)/),
-      seq = 0,
-      placeholderMap = {};
+        IS_URL = /^(https?:\/\/|ftps?:\/\/|mailto:|\.|\/)/,
+        IS_ANGULAR = /^(api\/)?(angular|ng|AUTO)\./,
+        IS_HASH = /^#/,
+        parts = trim(text).split(/(<pre.*?>[\s\S]*?<\/pre>|<doc:example(\S*).*?>[\s\S]*?<\/doc:example>|<example[^>]*>[\s\S]*?<\/example>)/),
+        seq = 0,
+        placeholderMap = {};
 
     function placeholder(text) {
       var id = 'REPLACEME' + (seq++);
@@ -203,98 +203,98 @@ Doc.prototype = {
 
     parts.forEach(function(text, i) {
       parts[i] = (text || '').
-        replace(/<example(?:\s+module="([^"]*)")?(?:\s+deps="([^"]*)")?(\s+animations="true")?>([\s\S]*?)<\/example>/gmi,
+      replace(/<example(?:\s+module="([^"]*)")?(?:\s+deps="([^"]*)")?(\s+animations="true")?>([\s\S]*?)<\/example>/gmi,
           function(_, module, deps, animations, content) {
 
-          var example = new Example(self.scenarios);
-          if(animations) {
-            example.enableAnimations();
-            example.addDeps('angular-animate.js');
-          }
+            var example = new Example(self.scenarios);
+            if(animations) {
+              example.enableAnimations();
+              example.addDeps('angular-animate.js');
+            }
 
-          example.setModule(module);
-          example.addDeps(deps);
-          content.replace(/<file\s+name="([^"]*)"\s*>([\s\S]*?)<\/file>/gmi, function(_, name, content) {
-            example.addSource(name, content);
-          });
-          content.replace(/<file\s+src="([^"]+)"(?:\s+tag="([^"]+)")?(?:\s+name="([^"]+)")?\s*\/?>/gmi, function(_, file, tag, name) {
-            if(fs.existsSync(file)) {
-              var content = fs.readFileSync(file, 'utf8');
-              if(content && content.length > 0) {
-                if(tag && tag.length > 0) {
-                  content = extractInlineDocCode(content, tag);
+            example.setModule(module);
+            example.addDeps(deps);
+            content.replace(/<file\s+name="([^"]*)"\s*>([\s\S]*?)<\/file>/gmi, function(_, name, content) {
+              example.addSource(name, content);
+            });
+            content.replace(/<file\s+src="([^"]+)"(?:\s+tag="([^"]+)")?(?:\s+name="([^"]+)")?\s*\/?>/gmi, function(_, file, tag, name) {
+              if(fs.existsSync(file)) {
+                var content = fs.readFileSync(file, 'utf8');
+                if(content && content.length > 0) {
+                  if(tag && tag.length > 0) {
+                    content = extractInlineDocCode(content, tag);
+                  }
+                  name = name && name.length > 0 ? name : fspath.basename(file);
+                  example.addSource(name, content);
                 }
-                name = name && name.length > 0 ? name : fspath.basename(file);
-                example.addSource(name, content);
               }
-            }
-            return '';
-          })
-          return placeholder(example.toHtml());
-        }).
-        replace(/(?:\*\s+)?<file.+?src="([^"]+)"(?:\s+tag="([^"]+)")?\s*\/?>/i, function(_, file, tag) {
-          if(fs.existsSync(file)) {
-            var content = fs.readFileSync(file, 'utf8');
-            if(tag && tag.length > 0) {
-              content = extractInlineDocCode(content, tag);
-            }
-            return content;
+              return '';
+            })
+            return placeholder(example.toHtml());
+          }).
+      replace(/(?:\*\s+)?<file.+?src="([^"]+)"(?:\s+tag="([^"]+)")?\s*\/?>/i, function(_, file, tag) {
+        if(fs.existsSync(file)) {
+          var content = fs.readFileSync(file, 'utf8');
+          if(tag && tag.length > 0) {
+            content = extractInlineDocCode(content, tag);
           }
-        }).
-        replace(/^<doc:example(\s+[^>]*)?>([\s\S]*)<\/doc:example>/mi, function(_, attrs, content) {
-          var html, script, scenario,
+          return content;
+        }
+      }).
+      replace(/^<doc:example(\s+[^>]*)?>([\s\S]*)<\/doc:example>/mi, function(_, attrs, content) {
+        var html, script, scenario,
             example = new Example(self.scenarios);
 
-          example.setModule((attrs||'module=""').match(/^\s*module=["'](.*)["']\s*$/)[1]);
-          content.
-            replace(/<doc:source(\s+[^>]*)?>([\s\S]*)<\/doc:source>/mi, function(_, attrs, content) {
-              example.addSource('index.html', content.
-                replace(/<script>([\s\S]*)<\/script>/mi, function(_, script) {
-                  example.addSource('script.js', script);
-                  return '';
-                }).
-                replace(/<style>([\s\S]*)<\/style>/mi, function(_, style) {
-                  example.addSource('style.css', style);
-                  return '';
-                })
-              );
-            }).
-            replace(/(<doc:scenario>)([\s\S]*)(<\/doc:scenario>)/mi, function(_, before, content){
-              example.addSource('scenario.js', content);
-            });
+        example.setModule((attrs||'module=""').match(/^\s*module=["'](.*)["']\s*$/)[1]);
+        content.
+        replace(/<doc:source(\s+[^>]*)?>([\s\S]*)<\/doc:source>/mi, function(_, attrs, content) {
+          example.addSource('index.html', content.
+              replace(/<script>([\s\S]*)<\/script>/mi, function(_, script) {
+                example.addSource('script.js', script);
+                return '';
+              }).
+              replace(/<style>([\s\S]*)<\/style>/mi, function(_, style) {
+                example.addSource('style.css', style);
+                return '';
+              })
+          );
+        }).
+        replace(/(<doc:scenario>)([\s\S]*)(<\/doc:scenario>)/mi, function(_, before, content){
+          example.addSource('scenario.js', content);
+        });
 
-          return placeholder(example.toHtml());
-        }).
-        replace(/^<pre(.*?)>([\s\S]*?)<\/pre>/mi, function(_, attrs, content){
-          return placeholder(
+        return placeholder(example.toHtml());
+      }).
+      replace(/^<pre(.*?)>([\s\S]*?)<\/pre>/mi, function(_, attrs, content){
+        return placeholder(
             '<pre'+attrs+' class="prettyprint linenums">' +
-              content.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
-              '</pre>');
-        }).
-        replace(/<div([^>]*)><\/div>/, '<div$1>\n<\/div>').
-        replace(/{@link\s+([^\s}]+)\s*([^}]*?)\s*}/g, function(_all, url, title){
-          var isFullUrl = url.match(IS_URL),
+            content.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+            '</pre>');
+      }).
+      replace(/<div([^>]*)><\/div>/, '<div$1>\n<\/div>').
+      replace(/{@link\s+([^\s}]+)\s*([^}]*?)\s*}/g, function(_all, url, title){
+        var isFullUrl = url.match(IS_URL),
             isAngular = url.match(IS_ANGULAR),
             isHash = url.match(IS_HASH),
             absUrl = isHash
-              ? url
-              : (isFullUrl ? url : self.convertUrlToAbsolute(url));
+                ? url
+                : (isFullUrl ? url : self.convertUrlToAbsolute(url));
 
-          if (!isFullUrl) self.links.push(absUrl);
+        if (!isFullUrl) self.links.push(absUrl);
 
-          return '<a href="' + absUrl + '">' +
+        return '<a href="' + absUrl + '">' +
             (isAngular ? '<code>' : '') +
             (title || url).replace(/^#/g, '').replace(/\n/g, ' ') +
             (isAngular ? '</code>' : '') +
             '</a>';
-        }).
-        replace(/{@type\s+(\S+)(?:\s+(\S+))?}/g, function(_, type, url) {
-          url = url || '#';
-          return '<a href="' + url + '" class="' + self.prepare_type_hint_class_name(type) + '">' + type + '</a>';
-        }).
-        replace(/{@installModule\s+(\S+)?}/g, function(_, module) {
-          return explainModuleInstallation(module);
-        });
+      }).
+      replace(/{@type\s+(\S+)(?:\s+(\S+))?}/g, function(_, type, url) {
+        url = url || '#';
+        return '<a href="' + url + '" class="' + self.prepare_type_hint_class_name(type) + '">' + type + '</a>';
+      }).
+      replace(/{@installModule\s+(\S+)?}/g, function(_, module) {
+        return explainModuleInstallation(module);
+      });
     });
     text = parts.join('');
 
@@ -314,8 +314,8 @@ Doc.prototype = {
     pageClassName = pageClassName || prepareClassName(this.name || 'docs') + suffix;
 
     text = '<div class="' + pageClassName + '">' +
-             marked(text) +
-           '</div>';
+        marked(text) +
+        '</div>';
     text = text.replace(/(?:<p>)?(REPLACEME\d+)(?:<\/p>)?/g, function(_, id) {
       return placeholderMap[id];
     });
@@ -324,37 +324,37 @@ Doc.prototype = {
     //!annotate="REGEX" CONTENT
     //!annotate="REGEX" TITLE|CONTENT
     text = text.replace(/\n?\/\/!annotate\s*(?:=\s*['"](.+?)['"])?\s+(.+?)\n\s*(.+?\n)/img,
-      function(_, pattern, content, line) {
-        var pattern = new RegExp(pattern || '.+');
-        var title, text, split = content.split(/\|/);
-        if(split.length > 1) {
-          text = split[1];
-          title = split[0];
+        function(_, pattern, content, line) {
+          var pattern = new RegExp(pattern || '.+');
+          var title, text, split = content.split(/\|/);
+          if(split.length > 1) {
+            text = split[1];
+            title = split[0];
+          }
+          else {
+            title = 'Info';
+            text = content;
+          }
+          return "\n" + line.replace(pattern, function(match) {
+                return '<div class="nocode nocode-content" data-popover ' +
+                    'data-content="' + text + '" ' +
+                    'data-title="' + title + '">' +
+                    match +
+                    '</div>';
+              });
         }
-        else {
-          title = 'Info';
-          text = content;
-        }
-        return "\n" + line.replace(pattern, function(match) {
-          return '<div class="nocode nocode-content" data-popover ' +
-                   'data-content="' + text + '" ' +
-                   'data-title="' + title + '">' +
-                      match +
-                 '</div>';
-        });
-      }
     );
 
     //!details /path/to/local/docs/file.html
     //!details="REGEX" /path/to/local/docs/file.html
     text = text.replace(/\/\/!details\s*(?:=\s*['"](.+?)['"])?\s+(.+?)\n\s*(.+?\n)/img,
-      function(_, pattern, url, line) {
-        url = '/notes/' + url;
-        var pattern = new RegExp(pattern || '.+');
-        return line.replace(pattern, function(match) {
-          return '<div class="nocode nocode-content" data-foldout data-url="' + url + '">' + match + '</div>';
-        });
-      }
+        function(_, pattern, url, line) {
+          url = '/notes/' + url;
+          var pattern = new RegExp(pattern || '.+');
+          return line.replace(pattern, function(match) {
+            return '<div class="nocode nocode-content" data-foldout data-url="' + url + '">' + match + '</div>';
+          });
+        }
     );
 
     return text;
@@ -393,9 +393,9 @@ Doc.prototype = {
     }
 
     this.id = this.id || // if we have an id just use it
-      (this.ngdoc === 'error' ? this.name : '') ||
-      (((this.file||'').match(/.*(\/|\\)([^(\/|\\)]*)\.ngdoc/)||{})[2]) || // try to extract it from file name
-      this.name; // default to name
+        (this.ngdoc === 'error' ? this.name : '') ||
+        (((this.file||'').match(/.*(\/|\\)([^(\/|\\)]*)\.ngdoc/)||{})[2]) || // try to extract it from file name
+        this.name; // default to name
     this.description = this.markdown(this.description);
     this.example = this.markdown(this.example);
     this['this'] = this.markdown(this['this']);
@@ -411,7 +411,7 @@ Doc.prototype = {
           }
         } else if (atName == 'param') {
           match = text.match(/^\{([^}]+)\}\s+(([^\s=]+)|\[(\S+)=([^\]]+)\])\s+(.*)/);
-                             //  1      1    23       3   4   4 5      5  2   6  6
+          //  1      1    23       3   4   4 5      5  2   6  6
           if (!match) {
             throw new Error("Not a valid 'param' format: " + text + ' (found in: ' + self.file + ':' + self.line + ')');
           }
@@ -489,13 +489,13 @@ Doc.prototype = {
 
   html: function() {
     var dom = new DOM(),
-      self = this,
-      minerrMsg;
+        self = this,
+        minerrMsg;
 
     if (this.options.editLink) {
       dom.tag('a', {
-          href: self.options.editLink(self.file, self.line, self.codeline),
-          class: 'improve-docs' }, function(dom) {
+        href: self.options.editLink(self.file, self.line, self.codeline),
+        class: 'improve-docs' }, function(dom) {
         dom.tag('i', {class:'icon-edit'}, ' ');
         dom.text('Improve this doc');
       });
@@ -503,8 +503,8 @@ Doc.prototype = {
 
     if (this.options.sourceLink && this.options.isAPI) {
       dom.tag('a', {
-          href: self.options.sourceLink(self.file, self.line, self.codeline),
-          class: 'view-source' }, function(dom) {
+        href: self.options.sourceLink(self.file, self.line, self.codeline),
+        class: 'view-source' }, function(dom) {
         dom.tag('i', {class:'icon-eye-open'}, ' ');
         dom.text('View source');
       });
@@ -729,14 +729,14 @@ Doc.prototype = {
       var restrict = self.restrict || 'A';
 
       /*
-      if (restrict.match(/E/)) {
-        dom.html('<p>');
-        dom.text('This directive can be used as custom element, but be aware of ');
-        dom.tag('a', {href:'guide/ie'}, 'IE restrictions');
-        dom.text('.');
-        dom.html('</p>');
-      }
-      */
+       if (restrict.match(/E/)) {
+       dom.html('<p>');
+       dom.text('This directive can be used as custom element, but be aware of ');
+       dom.tag('a', {href:'guide/ie'}, 'IE restrictions');
+       dom.text('.');
+       dom.html('</p>');
+       }
+       */
 
       if (self.usage) {
         dom.code(function() {
@@ -908,6 +908,10 @@ Doc.prototype = {
     this.html_usage_interface(dom)
   },
 
+  html_usage_factory: function(dom) {
+    this.html_usage_interface(dom)
+  },
+
   html_usage_object: function(dom) {
     this.html_usage_interface(dom)
   },
@@ -1009,6 +1013,7 @@ var GLOBALS = /^angular\.([^\.]+)$/,
     MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
     MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
     MODULE_SERVICE = /^(.+)\.([^\.]+?)(Provider)?$/,
+    MODULE_FACTORY = /^(.+)\.([^\.]+?)(Factory)?$/,
     MODULE_TYPE = /^([^\.]+)\..+\.([A-Z][^\.]+)$/;
 
 
@@ -1023,7 +1028,7 @@ function title(doc) {
     if (!module) {
       module = component;
       if (module == 'angular') {
-          module = 'ng';
+        module = 'ng';
       }
       doc.moduleName = module;
     }
@@ -1069,6 +1074,12 @@ function title(doc) {
       return makeTitle('', '', 'module', text);
     }
     return makeTitle(match[2] + (match[3] || ''), 'service', 'module', module || match[1]);
+  }else if (match = text.match(MODULE_FACTORY)) {
+    if (overview) {
+      // module name with dots looks like a factory
+      return makeTitle('', '', 'module', text);
+    }
+    return makeTitle(match[2] + (match[3] || ''), 'factory', 'module', module || match[1]);
   }
   return text;
 }
@@ -1146,6 +1157,7 @@ var KEYWORD_PRIORITY = {
   '.compiler': 5,
   '.templates': 6,
   '.services': 7,
+  '.factories': 7,
   '.di': 8,
   '.unit-testing': 9,
   '.dev_guide': 9,
@@ -1163,6 +1175,7 @@ var KEYWORD_PRIORITY = {
   '.dev_guide.compiler': 5,
   '.dev_guide.templates': 6,
   '.dev_guide.services': 7,
+  '.dev_guide.factories': 7,
   '.dev_guide.di': 8,
   '.dev_guide.unit-testing': 9
 };
@@ -1184,6 +1197,14 @@ var GUIDE_PRIORITY = [
   'dev_guide.services.testing_services',
   'dev_guide.services.$location',
   'dev_guide.services',
+
+  'dev_guide.factories.understanding_factories',
+  'dev_guide.factories.managing_dependencies',
+  'dev_guide.factories.creating_factories',
+  'dev_guide.factories.injecting_controllers',
+  'dev_guide.factories.testing_factories',
+  'dev_guide.factories.$location',
+  'dev_guide.factories',
 
   'databinding',
   'dev_guide.templates.css-styling',
@@ -1279,8 +1300,8 @@ function trim(text) {
 
 function indentCode(text, spaceCount) {
   var lines = text.split('\n'),
-    indent = '',
-    fixedLines = [];
+      indent = '',
+      fixedLines = [];
 
   while(spaceCount--) indent += ' ';
 
@@ -1314,7 +1335,7 @@ function merge(docs){
     var parent = byFullId[doc.section + '/' + parentName];
     if (!parent)
       throw new Error("No parent named '" + parentName + "' for '" +
-        doc.name + "' in @" + name + "Of.");
+          doc.name + "' in @" + name + "Of.");
 
     var listName = (name + 's').replace(/ys$/, 'ies');
     var list = parent[listName] = (parent[listName] || []);
@@ -1336,7 +1357,7 @@ function checkBrokenLinks(docs, apis, options) {
   docs.forEach(function(doc) {
     byFullId[doc.section + '/' + doc.id] = doc;
     if (apis[doc.section]) {
-      doc.anchors.push('directive', 'service', 'filter', 'function');
+      doc.anchors.push('directive', 'service', 'factory', 'filter', 'function');
     }
   });
 
@@ -1382,28 +1403,28 @@ function dashCase(name){
 
 function explainModuleInstallation(moduleName){
   var ngMod = ngModule(moduleName),
-    modulePackage = 'angular-' + moduleName,
-    modulePackageFile = modulePackage + '.js';
+      modulePackage = 'angular-' + moduleName,
+      modulePackageFile = modulePackage + '.js';
 
   return '<h1>Installation</h1>' +
-    '<p>First include <code>' + modulePackageFile +'</code> in your HTML:</p><pre><code>' +
-    '    &lt;script src=&quot;angular.js&quot;&gt;\n' +
-    '    &lt;script src=&quot;' + modulePackageFile + '&quot;&gt;</pre></code>' +
+      '<p>First include <code>' + modulePackageFile +'</code> in your HTML:</p><pre><code>' +
+      '    &lt;script src=&quot;angular.js&quot;&gt;\n' +
+      '    &lt;script src=&quot;' + modulePackageFile + '&quot;&gt;</pre></code>' +
 
-    '<p>You can download this file from the following places:</p>' +
-    '<ul>' +
+      '<p>You can download this file from the following places:</p>' +
+      '<ul>' +
       '<li>[Google CDN](https://developers.google.com/speed/libraries/devguide#angularjs)<br>' +
-        'e.g. <code>"//ajax.googleapis.com/ajax/libs/angularjs/X.Y.Z/' + modulePackageFile + '"</code></li>' +
+      'e.g. <code>"//ajax.googleapis.com/ajax/libs/angularjs/X.Y.Z/' + modulePackageFile + '"</code></li>' +
       '<li>[Bower](http://bower.io)<br>' +
-       'e.g. <code>bower install ' + modulePackage + '@X.Y.Z</code></li>' +
+      'e.g. <code>bower install ' + modulePackage + '@X.Y.Z</code></li>' +
       '<li><a href="http://code.angularjs.org/">code.angularjs.org</a><br>' +
-        'e.g. <code>"//code.angularjs.org/X.Y.Z/' + modulePackageFile + '"</code></li>' +
-    '</ul>' +
-    '<p>where X.Y.Z is the AngularJS version you are running.</p>' +
-    '<p>Then load the module in your application by adding it as a dependent module:</p><pre><code>' +
-    '    angular.module(\'app\', [\'' + ngMod + '\']);</pre></code>' +
+      'e.g. <code>"//code.angularjs.org/X.Y.Z/' + modulePackageFile + '"</code></li>' +
+      '</ul>' +
+      '<p>where X.Y.Z is the AngularJS version you are running.</p>' +
+      '<p>Then load the module in your application by adding it as a dependent module:</p><pre><code>' +
+      '    angular.module(\'app\', [\'' + ngMod + '\']);</pre></code>' +
 
-    '<p>With that you\'re ready to get started!</p>';
+      '<p>With that you\'re ready to get started!</p>';
 }
 
 function ngModule(moduleName) {

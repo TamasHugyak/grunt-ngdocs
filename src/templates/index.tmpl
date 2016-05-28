@@ -210,6 +210,14 @@
               <a href="{{service.instance ? service.instance.url : service.provider.url}}" tabindex="2">{{service.name}}</a>
             </li>
 
+            <li class="nav-header section" ng-show="module.factories.length">
+              <a class="guide">factory</a>
+            </li>
+            <li ng-repeat="factory in module.factories track by  (factory.instance.url || factory.factory.url)" ng-class="navClass(factory.instance, factory.factory)" class="api-list-item expand">
+              <a href="{{factory.factory.url}}" tabindex="2">{{factory.name}}</a>
+            </li>
+
+
             <li class="nav-header section" ng-show="module.types.length">
               <a class="guide">Types</a>
             </li>

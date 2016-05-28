@@ -8,10 +8,10 @@ var docsApp = {
 docsApp.directive.ngHtmlWrapLoaded = function(reindentCode, templateMerge, loadedUrls) {
   function escape(text) {
     return text.
-      replace(/\&/g, '&amp;').
-      replace(/\</g, '&lt;').
-      replace(/\>/g, '&gt;').
-      replace(/"/g, '&quot;');
+    replace(/\&/g, '&amp;').
+    replace(/\</g, '&lt;').
+    replace(/\>/g, '&gt;').
+    replace(/"/g, '&quot;');
   }
 
   function setHtmlIe8SafeWay(element, html) {
@@ -29,7 +29,7 @@ docsApp.directive.ngHtmlWrapLoaded = function(reindentCode, templateMerge, loade
             module: '',
             body: element.text()
           },
-        html = "<!doctype html>\n<html ng-app{{module}}>\n  <head>\n{{head:4}}  </head>\n  <body>\n{{body:4}}  </body>\n</html>";
+          html = "<!doctype html>\n<html ng-app{{module}}>\n  <head>\n{{head:4}}  </head>\n  <body>\n{{body:4}}  </body>\n</html>";
 
       angular.forEach(loadedUrls.base, function(dep) {
         properties.head += '<script src="' + dep + '"></script>\n';
@@ -80,7 +80,7 @@ docsApp.directive.code = function() {
 docsApp.directive.sourceEdit = function(getEmbeddedTemplate) {
   return NG_DOCS.editExample ? {
     template: '<a class="edit-example pull-right" ng-click="plunkr($event)" href>' +
-      '<i class="icon-edit"></i> Edit in Plunkr</a>',
+    '<i class="icon-edit"></i> Edit in Plunkr</a>',
     scope: true,
     controller: function($scope, $attrs, openPlunkr) {
       var sources = {
@@ -160,13 +160,13 @@ docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loaded
         '</html>\n';
     var scriptDeps = '';
     angular.forEach(loadedUrls.base, function(url) {
-        scriptDeps += '    <script src="' + url + '"></script>\n';
+      scriptDeps += '    <script src="' + url + '"></script>\n';
     });
     angular.forEach(allFiles, function(file) {
       var ext = file.name.split(/\./).pop();
-        if (ext == 'css') {
-          scriptDeps += '    <link rel="stylesheet" href="' + file.name + '" type="text/css">\n';
-        } else if (ext == 'js' && file.name !== 'angular.js') {
+      if (ext == 'css') {
+        scriptDeps += '    <link rel="stylesheet" href="' + file.name + '" type="text/css">\n';
+      } else if (ext == 'js' && file.name !== 'angular.js') {
         scriptDeps += '    <script src="' + file.name + '"></script>\n';
       }
     });
@@ -237,6 +237,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       MODULE_FILTER = /^(.+)\.filters?:([^\.]+)$/,
       MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
       MODULE_SERVICE = /^(.+)\.([^\.]+?)(Provider)?$/,
+      MODULE_FACTORY = /^(.+)\.([^\.]+?)(Factory)?$/,
       MODULE_TYPE = /^([^\.]+)\..+\.([A-Z][^\.]+)$/;
 
 
@@ -250,7 +251,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       last: this.$last,
       active: page1 && this.currentPage == page1 || page2 && this.currentPage == page2,
       match: this.focused && this.currentPage != page1 &&
-             this.bestMatch.rank > 0 && this.bestMatch.page == page1
+      this.bestMatch.rank > 0 && this.bestMatch.page == page1
 
     };
   };
@@ -287,9 +288,9 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
   });
   $scope.$watch(function docsPathWatch() {return $location.path(); }, function docsPathWatchAction(path) {
     var parts = path.split('/'),
-      sectionId = parts[1],
-      partialId = parts[2],
-      page, sectionName = $scope.sections[(NG_DOCS.html5Mode ? '' : '#/') + sectionId];
+        sectionId = parts[1],
+        partialId = parts[2],
+        page, sectionName = $scope.sections[(NG_DOCS.html5Mode ? '' : '#/') + sectionId];
 
     if (!sectionName) { return; }
 
@@ -305,7 +306,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
 
     // Update breadcrumbs
     var breadcrumb = $scope.breadcrumb = [],
-      match, sectionPath = (NG_DOCS.html5Mode ? '' : '#/') +  sectionId;
+        match, sectionPath = (NG_DOCS.html5Mode ? '' : '#/') +  sectionId;
 
     if (partialId) {
       breadcrumb.push({ name: sectionName, url: sectionPath });
@@ -339,6 +340,15 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
         breadcrumb.push({ name: match[2] });
       }  else if (match = partialId.match(MODULE_SERVICE)) {
+        if ( page.type === 'overview') {
+          // module name with dots looks like a service
+          breadcrumb.push({ name: partialId });
+        } else {
+          match[1] = page.moduleName || match[1];
+          breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
+          breadcrumb.push({ name: match[2] + (match[3] || '') });
+        }
+      }  else if (match = partialId.match(MODULE_FACTORY)) {
         if ( page.type === 'overview') {
           // module name with dots looks like a service
           breadcrumb.push({ name: partialId });
@@ -388,8 +398,8 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
 
     angular.forEach(pages, function(page) {
       var match,
-        id = page.id,
-        section = page.section;
+          id = page.id,
+          section = page.section;
 
       if (!(match = rank(page, search))) return;
 
@@ -418,9 +428,11 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       } else if (match = id.match(MODULE_CUSTOM)) {
         if (page.type === 'service') {
           module(page.moduleName || match[1], section).service(match[3])[page.id.match(/^.+Provider$/) ? 'provider' : 'instance'] = page;
+        } else if (page.type === 'factory') {
+          module(page.moduleName || match[1], section).factory(match[3])['factory'] = page;
         } else {
           var m = module(page.moduleName || match[1], section),
-            listName = page.type + 's';
+              listName = page.type + 's';
 
           if (m[listName]) {
             m[listName].push(page);
@@ -435,6 +447,12 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           module(id, section);
         } else {
           module(page.moduleName || match[1], section).service(match[2])[match[3] ? 'provider' : 'instance'] = page;
+        }
+      }else if (match = id.match(MODULE_FACTORY)) {
+        if (page.type === 'overview') {
+          module(id, section);
+        } else {
+          module(page.moduleName || match[1], section).factory(match[2])[match[3] ? 'factory' : 'instance'] = page;
         }
       } else if (match = id.match(MODULE_MOCK)) {
         module('ngMock', section).globals.push(page);
@@ -456,6 +474,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           controllers: [],
           directives: [],
           services: [],
+          factories: [],
           others: [],
           service: function(name) {
             var service =  cache[this.name + ':' + name];
@@ -463,6 +482,15 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
               service = {name: name};
               cache[this.name + ':' + name] = service;
               this.services.push(service);
+            }
+            return service;
+          },
+          factory: function(name) {
+            var service =  cache[this.name + ':' + name];
+            if (!service) {
+              service = {name: name};
+              cache[this.name + ':' + name] = service;
+              this.factories.push(service);
             }
             return service;
           },
@@ -476,8 +504,8 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
 
     function rank(page, terms) {
       var ranking = {page: page, rank:0},
-        keywords = page.keywords,
-        title = page.shortName.toLowerCase();
+          keywords = page.keywords,
+          title = page.shortName.toLowerCase();
 
       terms && angular.forEach(terms.toLowerCase().split(' '), function(term) {
         var index;
@@ -511,7 +539,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = '//angularjs.disqus.com/embed.js';
       (document.getElementsByTagName('head')[0] ||
-        document.getElementsByTagName('body')[0]).appendChild(dsq);
+      document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
 
     angular.element(document.getElementById('disqus_thread')).html('');
@@ -531,11 +559,11 @@ function module(name, modules, optional) {
 }
 
 module('docsApp', ['bootstrap', 'bootstrapPrettify'], ['ngAnimate']).
-  config(function($locationProvider) {
-    if (NG_DOCS.html5Mode) {
-      $locationProvider.html5Mode(true).hashPrefix('!');
-    }
-  }).
-  factory(docsApp.serviceFactory).
-  directive(docsApp.directive).
-  controller(docsApp.controller);
+config(function($locationProvider) {
+  if (NG_DOCS.html5Mode) {
+    $locationProvider.html5Mode(true).hashPrefix('!');
+  }
+}).
+factory(docsApp.serviceFactory).
+directive(docsApp.directive).
+controller(docsApp.controller);
