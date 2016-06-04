@@ -47,6 +47,9 @@
       <% _.forEach(scripts, function(url) { %>
         addTag('script', {src: '<%= url %>'}, sync);
       <% }); %>
+      <% _.forEach(hiddenScripts, function(url) { %>
+        addTag('script', {src: '<%= url %>'}, sync);
+      <% }); %>
       <% if(!deferLoad) { %>
       addTag('script', {src: 'js/angular-bootstrap.js'}, sync);
       addTag('script', {src: 'js/angular-bootstrap-prettify.js'}, sync);

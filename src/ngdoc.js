@@ -935,10 +935,6 @@ Doc.prototype = {
     this.html_usage_interface(dom)
   },
 
-  html_usage_controller: function(dom) {
-    this.html_usage_interface(dom)
-  },
-
   method_properties_events: function(dom) {
     var self = this;
     if (self.methods.length) {
@@ -1027,7 +1023,7 @@ Doc.prototype = {
 var GLOBALS = /^angular\.([^\.]+)$/,
     MODULE = /^([^\.]+)$/,
     MODULE_MOCK = /^angular\.mock\.([^\.]+)$/,
-    MODULE_CONTROLLER = /^(.+)\.controllers?:([^\.]+)$/,
+    //MODULE_CONTROLLER = /^(.+)\.controllers?:([^\.]+)$/,
     MODULE_DIRECTIVE = /^(.+)\.directives?:([^\.]+)$/,
     MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
     MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
