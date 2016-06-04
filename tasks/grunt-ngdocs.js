@@ -32,6 +32,7 @@ module.exports = function(grunt) {
           dest: 'docs/',
           startPage: '/api',
           scripts: ['angular.js'],
+          hiddenScripts: [],
           styles: [],
           title: pkg.title || pkg.name || '',
           html5Mode: false,
@@ -67,6 +68,20 @@ module.exports = function(grunt) {
       //Return the script path: doesn't have options.dest in it, it's relative
       //to the docs folder itself
       return gruntScriptsFolder + '/' + filename;
+    });
+
+    options.hiddenScripts = _.map(options.hiddenScripts, function(file) {
+      if (linked.test(file)) {
+        return file;
+      } else {
+        var filename = file.split('/').pop();
+        //Use path.join here because we aren't sure if options.dest has / or not
+        grunt.file.copy(file, path.join(options.dest, gruntScriptsFolder, filename));
+
+        //Return the script path: doesn't have options.dest in it, it's relative
+        //to the docs folder itself
+        return gruntScriptsFolder + '/' + filename;
+      }
     });
 
     if (options.image && !linked.test(options.image)) {
@@ -207,6 +222,7 @@ module.exports = function(grunt) {
     var options = setup.__options,
         content, data = {
           scripts: options.scripts,
+          hiddenScripts: options.hiddenScripts,
           styles: options.styles,
           sections: _.keys(setup.sections).join('|'),
           discussions: options.discussions,
